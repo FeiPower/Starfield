@@ -45,6 +45,15 @@ function draw() {
   }
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight); // Adjust canvas size
+  // Reinitialize stars with new positions based on the new canvas size
+  stars = [];
+  for (let i = 0; i < quantity; i++) {
+    stars.push(new Star());
+  }
+}
+
 class Star {
   constructor() {
     this.x = random(-width, width);
