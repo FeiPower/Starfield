@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Starfield Visualization</title>
+    <style>
+        body, html {
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* Ensures no scrollbars are added */
+        }
+        canvas {
+          display: block; /* Removes the margin in the bottom of the canvas */
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+
+<script>
+// Paste your modified JavaScript code here
+
+let stars = [];
+let speed;
+let quantity;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  quantity = 1000; // Default quantity of stars
+  speed = 40; // Default speed of stars
+  for (let i = 0; i < quantity; i++) {
+    stars.push(new Star());
+  }
+}
+
+function draw() {
+  // Speed controlled by mouse's distance to center
+  let d = dist(mouseX, mouseY, width / 2, height / 2);
+  speed = map(d, 0, dist(0, 0, width / 2, height / 2), 50, 0);
+  
+  background(0);
+  translate(width / 2, height / 2);
+  for (let star of stars) {
+    star.update();
+    star.show();
+  }
+}
+
+class Star {
+  constructor() {
+    this.x = random(-width, width);
+    this.y = random(-height, height);
+    this.z = random(width);
+    this.pz = this.z;
+    this.opacity = 0; // Starting opacity
+    this.originalSpeed = this.z; // Store the original speed
+    this.layer = random(1); // Determine which layer the star is in (0 is close, 1 is far)
+
+  }
+
+  update() {
+      let dx = (this.x / this.z) - (width / 2);
+      let dy = (this.y / this.z) - (height / 2);
+      let distance = sqrt(dx * dx + dy * dy);
+      let speedModifier = map(distance, 0, dist(0, 0, width / 2, height / 2), 0.5, 1.5);
+
+      this.z = this.z - speed * speedModifier * (1 + this.layer);
+
+      if (this.z < 1) {
+        this.z = this.originalSpeed;
+        this.x = random(-width, width);
+        this.y = random(-height, height);
+        this.pz = this.z;
+        this.opacity = 0;
+      }
+
+      this.opacity += 20;
+      this.opacity = constrain(this.opacity, 0, 255);
+    }
+
+  show() {
+    let sx = map(this.x / this.z, 0, 1, 0, width);
+    let sy = map(this.y / this.z, 0, 1, 0, height);
+    let r = map(this.z, 0, width, 16, 0);
+    let fadeR = map(this.opacity, 0, 255, 0, r);
+
+    let brightness = map(this.layer, 0, 1, 255, 100);
+    let r2 = map(this.layer, 0, 1, 255, 255);
+    let g = map(this.layer, 0, 1, 255, 255);
+    let b = map(this.layer, 0, 1, 255, 255);
+    fill(r2, g, b, this.opacity);
+    // Increase the size of the stars to make them appear brighter
+    let r3 = map(this.z, 0, width, 20, 0); // Increase the base size
+
+    // Draw a glow effect
+    noStroke();
+    fill(r2, g, b, this.opacity / 2); // More transparent
+    ellipse(sx, sy, fadeR * 1.5, fadeR * 1.5); // Larger ellipse behind the main one
+
+    fill(r2, g, b, this.opacity);
+    ellipse(sx, sy, fadeR, fadeR);
+    
+    noStroke();
+    ellipse(sx, sy, fadeR, fadeR);
+
+    let px = map(this.x / this.pz, 0, 1, 0, width);
+    let py = map(this.y / this.pz, 0, 1, 0, height);
+    this.pz = this.z;
+
+    stroke(255, this.opacity);
+    line(px, py, sx, sy);
+  }
+}
+
+// Functions to adjust the number of stars remain unchanged
+function keyPressed() {
+  if (key == 'q') {
+    quantity += 100; // Increase the quantity
+    stars = [];
+    for (let i = 0; i < quantity; i++) {
+      stars.push(new Star());
+    }
+  } else if (key == 'a' && quantity > 100) {
+    quantity -= 100; // Decrease the quantity
+    stars.splice(0, 100); // Remove 100 stars from the array
+  }
+}
+
+</script>
+
+</body>
+</html>
