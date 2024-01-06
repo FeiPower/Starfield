@@ -58,38 +58,41 @@ class Star {
   }
 
   update() {
-      let dx = (this.x / this.z) - (width / 2);
-      let dy = (this.y / this.z) - (height / 2);
-      let distance = sqrt(dx * dx + dy * dy);
-      let speedModifier = map(distance, 0, dist(0, 0, width / 2, height / 2), 0.5, 1.5);
+    let dx = (this.x / this.z) - (width / 2);
+    let dy = (this.y / this.z) - (height / 2);
+    let distance = sqrt(dx * dx + dy * dy);
+    let speedModifier = map(distance, 0, dist(0, 0, width / 2, height / 2), 0.5, 1.5);
 
-      this.z = this.z - speed * speedModifier * (1 + this.layer);
+    this.z = this.z - speed * speedModifier * (1 + this.layer);
 
-      if (this.z < 1) {
-        this.z = this.originalSpeed;
-        this.x = random(-width, width);
-        this.y = random(-height, height);
-        this.pz = this.z;
-        this.opacity = 0;
-      }
+    if (this.z < 1) {
+      this.z = this.originalSpeed;
+      this.x = random(-width, width);
+      this.y = random(-height, height);
+      this.pz = this.z;
+      this.opacity = 0;
+    }
 
-      this.opacity += 20;
-      this.opacity = constrain(this.opacity, 0, 255);
+    this.opacity += 20;
+    this.opacity = constrain(this.opacity, 0, 255);
     }
 
   show() {
     let sx = map(this.x / this.z, 0, 1, 0, width);
     let sy = map(this.y / this.z, 0, 1, 0, height);
-    let r = map(this.z, 0, width, 16, 0);
+    let r = map(this.z, 0, width, 20, 0);
     let fadeR = map(this.opacity, 0, 255, 0, r);
 
     let brightness = map(this.layer, 0, 1, 255, 100);
-    let r2 = map(this.layer, 0, 1, 255, 255);
-    let g = map(this.layer, 0, 1, 255, 255);
-    let b = map(this.layer, 0, 1, 255, 255);
-    fill(r2, g, b, this.opacity);
-    // Increase the size of the stars to make them appear brighter
-    let r3 = map(this.z, 0, width, 20, 0); // Increase the base size
+    // Simulating a temperature-based color for stars
+    let temperature = map(this.layer, 0, 1, 2000, 10000); // Map the layer to a temperature range (in Kelvin)
+
+    // Convert the temperature to RGB values. These formulas are based on black-body radiation and are simplified.
+    let r2 = constrain(map(temperature, 2000, 10000, 255, 155), 0, 255); // Cooler stars are redder.
+    let g = constrain(map(temperature, 2000, 10000, 0, 255), 0, 255); // Green peaks at mid temperatures.
+    let b = constrain(map(temperature, 2000, 10000, 0, 255), 0, 255); // Hotter stars are bluer.
+
+    fill(r2, g, b, this.opacity); // Set the fill color with the calculated RGB values and current opacity.
 
     // Draw a glow effect
     noStroke();
